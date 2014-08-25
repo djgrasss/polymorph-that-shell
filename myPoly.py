@@ -53,8 +53,14 @@ else:
         decodingByte = hex(random.randint(1, 255))
 	input = sys.argv[1][2:]
 	input = input.replace(", ", ", " + decodingByte + ", ")
+	# original shellcode length
+	originalShellcodeLength = 0
+	for x in input:
+		if x == ',':
+			originalShellcodeLength += 1
+	originalShellcodeLength = (originalShellcodeLength/2) + 1
 
-	print "[+] Encoding shellcode ..."
+	print "[+] Encoding original shellcode (" + str(originalShellcodeLength) + " Bytes)..."
 	# generate assembler procedure names and variables
 	# save shellcode variable
 	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
@@ -83,7 +89,7 @@ else:
 	shellIterator = unusedRegisters.pop(tmp) 
 
 	# build the assembler file string
-	print "[+] Building the assembler code ..."
+	print "[+] Building mutated decoder-snippet..."
 	assembler += "global _start\n"
 	assembler += "section .text\n"
 	assembler += "_start:\n"
@@ -173,7 +179,7 @@ else:
 	assembler += callPoly(callAfterOrders)
 
 	# save the assembler file
-	print "[+] Saving the the assembler file ..."
+	print "[+] Saving the black magic into an assembler file..."
 	file = open("tmp.nasm", "w")
 	file.write(assembler)
 	file.close()
