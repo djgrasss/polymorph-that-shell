@@ -1,7 +1,11 @@
 #!/bin/bash
 
 echo " "
-echo -n $1 | grep '[0-9a-f]' | sed 's/\\x/, 0x/g' | xargs -I{} ./myPoly.py "{}"
+if [ "$1" = "-f" ]; then
+	./myPoly.py "-f" $2
+else
+	echo -n $1 | grep '[0-9a-f]' | sed 's/\\x/, 0x/g' | xargs -I{} ./myPoly.py "{}"
+fi
 
 echo "[+] Compiling and linking..."
 nasm -f elf32 -o tmp.o tmp.nasm

@@ -47,12 +47,24 @@ def callPoly(count):
 
 
 if len(sys.argv) < 2:
-	sys.exit('Usage: %s <shellcode>' % sys.argv[0])
+	sys.exit('Usage: %s [<shellcode>|<shellcode_file>]' % sys.argv[0])
 else:
-        # decoding byte
-        decodingByte = hex(random.randint(1, 255))
-	input = sys.argv[1][2:]
+	# decoding byte
+	decodingByte = hex(random.randint(1, 255))
+	# load shell from a file
+	if len(sys.argv) > 2:
+		if sys.argv[1] == '-f':
+			file = open(sys.argv[2], "r")
+			content = file.read()
+			content = content.strip(" \t\n\r")
+			file.close()
+			content = content.replace("\\", ", 0")
+			input = content[2:]
+	# direct shell input
+	else:
+		input = sys.argv[1][2:]
 	input = input.replace(", ", ", " + decodingByte + ", ")
+
 	# original shellcode length
 	originalShellcodeLength = 0
 	for x in input:
