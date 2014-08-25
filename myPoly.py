@@ -59,6 +59,7 @@ else:
 		if x == ',':
 			originalShellcodeLength += 1
 	originalShellcodeLength = (originalShellcodeLength/2) + 1
+	input += ", " + str(decodingByte) + ", " + str(decodingByte)
 
 	print "[+] Encoding original shellcode (" + str(originalShellcodeLength) + " Bytes)..."
 	# generate assembler procedure names and variables
