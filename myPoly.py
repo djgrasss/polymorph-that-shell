@@ -67,17 +67,21 @@ else:
 	originalShellcodeLength = 0
 	for x in bytearray(content):
 		originalShellcodeLength += 1
-		input += hex(x)
+		# NOT encode
+		curValue = ~x
+		curValue = hex(curValue & 0xff)
+		input += curValue
 		if originalShellcodeLength == len(bytearray(content)):
 			input += ", " + str(stoppingByte)
 			break
+		# insertion encode
 		while True:
                 	tmpByte = hex(random.randint(1, 255))
-                        if tmpByte != stoppingByte and tmpByte != hex(x):
+                        if tmpByte != stoppingByte and tmpByte != curValue:
                         	input += ", " + str(tmpByte) + ", "
                                 break
-
 	print "[+] Encoding original shellcode (" + str(originalShellcodeLength) + " Bytes)..."
+
 	# generate assembler procedure names and variables
 	# save shellcode variable
 	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
@@ -153,6 +157,7 @@ else:
         if tmpRand == 0:
                 assembler += "\tmov " + tmpValue + ", " + commonRegisters[tmpRegister] + "\n"
 	assembler += "\txor " + tmpValue + ", " + tmpValue + "\n"
+	assembler += "\tnot byte [" + popRegister + "]\n"	
 	# access decode procedure
 	assembler += decode + ":\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + "]\n"
@@ -160,6 +165,7 @@ else:
 	assembler += "\tjz short " + shellcodeLabel + "\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1]\n"
 	assembler += "\tmov byte [" + shellIterator + "], " + tmpValueLowerByte + "\n"
+	assembler += "\tnot byte [" + shellIterator + "]\n"
 	tmpRand = random.randint(0, 1)
 	if tmpRand == 0:
 		assembler += "\tinc " + shellIterator + "\n"
