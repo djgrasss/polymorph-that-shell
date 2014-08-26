@@ -49,45 +49,34 @@ def callPoly(count):
 if len(sys.argv) < 2:
 	sys.exit('Usage: %s [<shellcode>|<shellcode_file>]' % sys.argv[0])
 else:
-	# decoding byte
-	#decodingByte = random.randint(1, 255)
+	# stopping Byte declaration
 	stoppingByte = hex(random.randint(1, 255))
 	# load shell from a file
 	if len(sys.argv) > 2:
-		if sys.argv[1] == '-f':
+        	if sys.argv[1] == '-f':
 			file = open(sys.argv[2], "r")
-			content = file.read()
-			content = content.strip(" \t\n\r")
-			file.close()
-			content = content.replace("\\", ", 0")
-			input = content[2:]
+        		content = file.read()
+        		content = content.strip(" \t\n\r")
+			content = content.decode("string_escape")
+        		file.close()
 	# direct shell input
 	else:
-		input = sys.argv[1][2:]
+		content = sys.argv[1].decode("string_escape")
 
-	input2 = ""
-	for i in input:
-		if i == ',':
-			while True:
-				tmpByte = hex(random.randint(1, 255))
-				if tmpByte != stoppingByte:
-					input2 += ", " + str(tmpByte) + ","
-					break
-		else:
-			input2 += i
-			
-#	input = input.replace(", ", ", " + decodingByte + ", ")
-
-	# original shellcode length
+	input = ""
 	originalShellcodeLength = 0
-	for x in input:
-		if x == ',':
-			originalShellcodeLength += 1
-	originalShellcodeLength = (originalShellcodeLength/2) + 1
-	input = input2
-	input += ", " + str(stoppingByte) 
+	for x in bytearray(content):
+		originalShellcodeLength += 1
+		input += hex(x)
+		if originalShellcodeLength == len(bytearray(content)):
+			input += ", " + str(stoppingByte)
+			break
+		while True:
+                	tmpByte = hex(random.randint(1, 255))
+                        if tmpByte != stoppingByte and tmpByte != hex(x):
+                        	input += ", " + str(tmpByte) + ", "
+                                break
 
-	print input
 	print "[+] Encoding original shellcode (" + str(originalShellcodeLength) + " Bytes)..."
 	# generate assembler procedure names and variables
 	# save shellcode variable
@@ -197,7 +186,6 @@ else:
 	callAfterOrders = random.randint(0, 3)     
 	assembler += callPoly(callAfterOrders)
 
-	print assembler
 	# save the assembler file
 	print "[+] Saving the black magic into an assembler file..."
 	file = open("tmp.nasm", "w")

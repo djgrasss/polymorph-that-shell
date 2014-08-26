@@ -4,7 +4,7 @@ echo " "
 if [ "$1" = "-f" ]; then
 	./myPoly.py "-f" $2
 else
-	echo -n $1 | grep '[0-9a-f]' | sed 's/\\x/, 0x/g' | xargs -I{} ./myPoly.py "{}"
+	./myPoly.py $1
 fi
 
 echo "[+] Compiling and linking..."
