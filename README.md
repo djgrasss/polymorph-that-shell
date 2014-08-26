@@ -2,7 +2,7 @@ polymorph-that-shell
 ====================
 
 
-Polymorph-that-shell is a simple polymorphic engine to dynamically encode (Insertion-Encoder) shellcode. Therefore "everytime" the decoder stub is created in another way (polymorph).
+Polymorph-that-shell is a simple polymorphic engine to dynamically encode (Insertion-Encoder) shellcode. Therefore "everytime" the decoder stub is created in another way (polymorph). This may avoid antivirus and IDS protection.
 
 System requirements: linux x86 environment, python 2.7, nasm, ld, objdump
 
