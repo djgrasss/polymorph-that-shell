@@ -50,7 +50,8 @@ if len(sys.argv) < 2:
 	sys.exit('Usage: %s [<shellcode>|<shellcode_file>]' % sys.argv[0])
 else:
 	# decoding byte
-	decodingByte = hex(random.randint(1, 255))
+	#decodingByte = random.randint(1, 255)
+	stoppingByte = hex(random.randint(1, 255))
 	# load shell from a file
 	if len(sys.argv) > 2:
 		if sys.argv[1] == '-f':
@@ -63,7 +64,19 @@ else:
 	# direct shell input
 	else:
 		input = sys.argv[1][2:]
-	input = input.replace(", ", ", " + decodingByte + ", ")
+
+	input2 = ""
+	for i in input:
+		if i == ',':
+			while True:
+				tmpByte = hex(random.randint(1, 255))
+				if tmpByte != stoppingByte:
+					input2 += ", " + str(tmpByte) + ","
+					break
+		else:
+			input2 += i
+			
+#	input = input.replace(", ", ", " + decodingByte + ", ")
 
 	# original shellcode length
 	originalShellcodeLength = 0
@@ -71,8 +84,10 @@ else:
 		if x == ',':
 			originalShellcodeLength += 1
 	originalShellcodeLength = (originalShellcodeLength/2) + 1
-	input += ", " + str(decodingByte) + ", " + str(decodingByte)
+	input = input2
+	input += ", " + str(stoppingByte) 
 
+	print input
 	print "[+] Encoding original shellcode (" + str(originalShellcodeLength) + " Bytes)..."
 	# generate assembler procedure names and variables
 	# save shellcode variable
@@ -138,15 +153,6 @@ else:
 	assembler += decoder + ":\n"
 	assembler += "\tpop " + popRegister + "\n"
         assembler += "\tlea " + shellIterator + ", [" + popRegister + "+1]\n"
-#+++++++++++++++++++++++++++++++++++++++++++++++
-# To do: find alternative for lea ...
-#	tmpRand = random.randint(0, 1)
-#	if tmpRand == 0:
-#		assembler += "\tpop " + popRegister + "\n"
-#		assembler += "\tlea " + shellIterator + ", [" + popRegister + "+1]\n"
-#	elif tmpRand == 1:
-#		assembler += "\tmov " + shellIterator + ", [esp+1]\n"
-#+++++++++++++++++++++++++++++++++++++++++++++++
 	tmpRand = random.randint(0, 1)
 	tmpRegister = random.randint(0, len(commonRegisters)-1)
 	if tmpRand == 0:
@@ -161,8 +167,8 @@ else:
 	# access decode procedure
 	assembler += decode + ":\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + "]\n"
-	assembler += "\txor " + tmpValueLowerByte + ", " + decodingByte + "\n"
-	assembler += "\tjnz short " + shellcodeLabel + "\n"
+	assembler += "\txor " + tmpValueLowerByte + ", " + stoppingByte + "\n"
+	assembler += "\tjz short " + shellcodeLabel + "\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1]\n"
 	assembler += "\tmov byte [" + shellIterator + "], " + tmpValueLowerByte + "\n"
 	tmpRand = random.randint(0, 1)
@@ -191,6 +197,7 @@ else:
 	callAfterOrders = random.randint(0, 3)     
 	assembler += callPoly(callAfterOrders)
 
+	print assembler
 	# save the assembler file
 	print "[+] Saving the black magic into an assembler file..."
 	file = open("tmp.nasm", "w")
