@@ -11,3 +11,6 @@ Usage: ./polymorphThatShell.sh [SHELLCODE_IN_C_FORMAT|SHELLCODE_FILE]
 Example 1: ./polymorphThatShell.sh "\x31\xc0\xb0\x0b\x31\xdb\x53\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x8d\x54\x24\x08\x8d\x4c\x24\x08\xcd\x80"
 
 Example 2: ./polymorphThatShell.sh -f shellFile
+
+
+You also can use a simple GUI by calling the ./gui.pyw script
