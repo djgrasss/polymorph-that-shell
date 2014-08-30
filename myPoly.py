@@ -180,7 +180,15 @@ else:
 	if tmpRand == 0:
 		assembler += "\tmov " + insertIterator + ", " + commonRegisters[tmpRegister] + "\n"
 	assembler += "\txor " + insertIterator + ", " + insertIterator + "\n"
-	assembler += "\tmov " + insertIteratorLowerByte + ", 0x1\n"
+	tmpRand2 = random.randint(0, 1)
+	if tmpRand2 == 0:
+		tmpRand = random.randint(1, 254)
+		movValue = 0x1
+		permValue = movValue + tmpRand
+		assembler += "\tmov " + insertIteratorLowerByte + ", " + str(hex(permValue)) + "\n"
+		assembler += "\tsub " + insertIteratorLowerByte + ", " + str(hex(tmpRand)) + "\n"
+	else:
+		assembler += "\tmov " + insertIteratorLowerByte + ", 0x1\n"
 	tmpRand = random.randint(0, 1)
         tmpRegister = random.randint(0, len(commonRegisters)-1)
         if tmpRand == 0:
