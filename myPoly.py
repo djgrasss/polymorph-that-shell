@@ -173,7 +173,13 @@ else:
                 tmpValueLowerByte = "dl" 
 	# access decoder procedure
 	assembler += decoder + ":\n"
-	assembler += "\tpop " + popRegister + "\n"
+
+	tmpRand = random.randint(0, 1)
+	if tmpRand == 0:
+		assembler += "\tpop " + popRegister + "\n"
+	else:
+		assembler += "\tlea " + popRegister + ", [esp]\n"
+		assembler += "\tmov " + popRegister + ", [" + popRegister + "]\n"
         assembler += "\tlea " + shellIterator + ", [" + popRegister + " + 1 + " + str(numberOfGarbageBytes) + "]\n"
 	tmpRand = random.randint(0, 1)
 	tmpRegister = random.randint(0, len(commonRegisters)-1)
