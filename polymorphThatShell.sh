@@ -2,11 +2,20 @@
 
 echo " "
 countValue=0
+checkBadChars=0
 while true
 do
 	# load shellcode directly or from a file
-	if [ "$1" = "-f" ]; then
-		./myPoly.py "-f" $2
+	if [ "$2" != "" ]; then
+		if [ $1 = "-f" ]; then
+			./myPoly.py "-f" $2
+		elif [ $1 = "-fb" ]; then
+			checkBadChars=1
+			./myPoly.py "-f" $2
+		else
+			checkBadChars=1
+			./myPoly.py $2
+		fi
 	else
 		./myPoly.py $1
 	fi
@@ -22,8 +31,13 @@ do
 	# count length (number of characters) of the extracted shellcode
 	shellString=$(objdump -d tmp | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-7 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g')
 
+	if [ $checkBadChars == 0 ]; then
+                break 
+        fi 
+
 	echo "[+] Checking for bad characters: $countValue iteration..." 
 	badchars=$(./badchars.py ${shellString})
+
 	if [ $badchars == "0" ]; then
 		echo "[+] No bad characters found"
 		break
