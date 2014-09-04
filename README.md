@@ -7,6 +7,8 @@ Polymorph-that-shell is a simple polymorphic engine to dynamically encode (Inser
 
 System requirements: linux x86 environment, python 2.7, nasm, ld, objdump
 
+IMPORTANT: At the moment the compiler process only makes executables for linux before dumping their hex-code. If you need a working shellcode for windows you need to customize the .sh file
+
 
 Usage: ./polymorphThatShell.sh [OPTIONS] [SHELLCODE_IN_C_FORMAT|SHELLCODE_FILE]
 
